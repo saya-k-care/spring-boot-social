@@ -4,6 +4,9 @@ import com.mgbt.socialapp_backend.model.entity.*;
 import com.mgbt.socialapp_backend.model.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,5 +95,22 @@ public class UserService implements IService<UserApp> {
     @Transactional(readOnly = true)
     public List<UserApp> getUsersWhoseDeletionDateIsNotNull() {
         return repository.findByDeletionDateIsNotNull();
+    }
+    
+    public UserApp getJWTUser() {
+    	
+    	Object obj = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    	if (obj instanceof Jwt) {
+    	    Jwt jwt = (Jwt) obj;
+    	    // Extract email from the JWT claims (assuming email is present as a claim)
+    	    String email = jwt.getClaimAsString("email");
+            
+            UserApp userFound = findByUsername(email);
+            return userFound;
+
+    	}
+    	return null;
+    	
     }
 }

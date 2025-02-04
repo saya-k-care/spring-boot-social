@@ -20,7 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 public class SecurityConfiguration {
 
-    @Bean
+   @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     	System.out.println("securing.................... setting");
         http.cors()
