@@ -27,6 +27,9 @@ public class Feedback implements Serializable {
     @Column(name = "msg", length = 2000)
     private String msg;
 
+    @Column(name = "answer", length = 2000)
+    private String answer;
+    
     @Column(name = "creation_date", insertable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;

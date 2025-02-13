@@ -3,6 +3,8 @@ package com.mgbt.socialapp_backend.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mgbt.socialapp_backend.model.entity.Feedback;
 import com.mgbt.socialapp_backend.model.entity.FeedbackResponse;
 import com.mgbt.socialapp_backend.model.entity.UserApp;
-import com.mgbt.socialapp_backend.model.service.ChatService;
 import com.mgbt.socialapp_backend.model.service.FeedbackService;
 import com.mgbt.socialapp_backend.model.service.LearningService;
 import com.mgbt.socialapp_backend.model.service.UserService;
@@ -27,8 +28,10 @@ import com.mgbt.socialapp_backend.model.service.UserService;
 @PreAuthorize("isAuthenticated()")
 public class FeedbackController {
 
-	@Autowired
-	private ChatService chatService;
+	private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
+
+	//@Autowired
+	//private ChatService chatService;
 	
     @Autowired
     private UserService userService;
@@ -45,21 +48,18 @@ public class FeedbackController {
     @PostMapping("/update")
     public ResponseEntity<?> updateFeedback(@RequestBody Feedback feedback) throws JsonProcessingException {
     	
-    	System.out.println("feedback-->" + feedback);
+    	if (feedback.getUser() == null || feedback.getUser().getIdUser() == null) {
+        	UserApp userApp = userService.getJWTUser();
+        	
+        	feedback.setUser(userApp);
+    	}
+
+    	logger.info("user ID feedback:" + feedback.getUser().getIdUser());
+    	//FeedbackResponse feedbackResponse = chatService.chatGeneralFeedback(feedback.getMsg());
     	
-    	UserApp userApp = userService.getJWTUser();
-    	
-    	System.out.println("userApp-->" + userApp.getName());
-    	
-    	FeedbackResponse feedbackResponse = chatService.chatGeneralFeedback(feedback.getMsg());
-    	//ChatResponse responseAI = call.chatResponse();
-    	//call.chatResponse().
-    	System.out.println(" --- AI--> " +  feedbackResponse);
-    	
-    	
-    	feedback.setUser(userApp);
+    	feedback.setAnswer(feedback.getFeedbackResponse().getAnswer());
     	Feedback feedbackSaved = feedbackService.save(feedback);
-    	feedbackSaved.setFeedbackResponse(feedbackResponse);
+    	//feedbackSaved.setFeedbackResponse(feedback.getFeedbackResponse()
     	Map<String, Object> response = new HashMap<>();
         if (feedbackSaved != null) {
             //response.put("message", messageSource.getMessage("appController.login.userFound", null, locale));
@@ -73,4 +73,5 @@ public class FeedbackController {
         }
         
     }
+
 }
